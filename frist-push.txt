@@ -1,0 +1,68 @@
+import tkinter as tk
+from tkinter import messagebox
+import json
+import os
+
+TASKS_FILE = "tasks.json"
+
+def load_tasks():
+    if os.path.exists(TASKS_FILE):
+        with open(TASKS_FILE, "r") as f:
+            try:
+                return json.load(f)
+            except json.JSONDecodeError:
+                return []
+    return []
+
+def save_tasks(tasks):
+    with open(TASKS_FILE, "w") as f:
+        json.dump(tasks, f)
+
+def add_task():
+    task = entry.get().strip()
+    if task:
+        tasks.append(task)
+        listbox.insert(tk.END, task)
+        save_tasks(tasks)
+        entry.delete(0, tk.END)
+    else:
+        messagebox.showwarning("Empty Task", "Please enter a task.")
+
+def delete_task():
+    selected = listbox.curselection()
+    if selected:
+        index = selected[0]
+        task = listbox.get(index)
+        confirm = messagebox.askyesno("Delete Task", f"Delete '{task}'?")
+        if confirm:
+            listbox.delete(index)
+            tasks.pop(index)
+            save_tasks(tasks)
+    else:
+        messagebox.showinfo("No Selection", "Please select a task to delete.")
+
+# GUI setup
+root = tk.Tk()
+root.title("📝 To-Do List App")
+root.geometry("400x400")
+root.configure(bg="#f5f5f5")
+
+tasks = load_tasks()
+
+entry = tk.Entry(root, width=30, font=("Open Sans", 12))
+entry.pack(pady=10)
+
+add_btn = tk.Button(root, text="Add Task", command=add_task, font=("Montserrat", 10, "bold"), bg="#4CAF50", fg="white")
+add_btn.pack(pady=5)
+
+listbox = tk.Listbox(root, width=40, height=10, font=("Open Sans", 12), bg="#ffffff", fg="#333333")
+listbox.pack(pady=10)
+
+delete_btn = tk.Button(root, text="Delete Selected Task", command=delete_task, font=("Montserrat", 10, "bold"), bg="#f44336", fg="white")
+delete_btn.pack(pady=5)
+
+for task in tasks:
+    listbox.insert(tk.END, task)
+
+root.mainloop()
+
